@@ -49,21 +49,26 @@ impl Ui {
     /// Read pontentiometer and buttons and updates the RGB
     /// global accordingly.
     pub async fn run(&mut self) -> ! {
-        self.state.levels[2] = self.knob.measure().await;
+        let mut level = self.knob.measure().await;
+        for led in 0..3 {
+            self.state.levels[led] = level;
+        }
         set_rgb_levels(|rgb| {
             *rgb = self.state.levels;
         })
         .await;
         self.state.show();
         loop {
-            let level = self.knob.measure().await;
-            if level != self.state.levels[2] {
-                self.state.levels[2] = level;
-                self.state.show();
-                set_rgb_levels(|rgb| {
-                    *rgb = self.state.levels;
-                })
-                .await;
+            level = self.knob.measure().await;
+            for led in 0..3 {
+                if level != self.state.levels[led] {
+                    self.state.levels[led] = level;
+                    self.state.show();
+                    set_rgb_levels(|rgb| {
+                        *rgb = self.state.levels;
+                    })
+                    .await;
+                }
             }
             Timer::after_millis(50).await;
         }
