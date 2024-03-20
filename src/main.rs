@@ -25,13 +25,27 @@ use microbit_bsp::{
 };
 use num_traits::float::FloatCore;
 
-pub static RGB_LEVELS: Mutex<ThreadModeRawMutex, [u32; 3]> = Mutex::new([0; 3]);
+pub struct Rgbfps {
+    rgb_levels: [u32; 3],
+    frame_rate: u32,
+}
+
+impl Rgbfps {
+    const fn new() -> Self{
+        Self {
+            rgb_levels: [0; 3],
+            frame_rate: 0,
+        }
+    }
+}
+
+pub static RGB_LEVELS: Mutex<ThreadModeRawMutex, Rgbfps> = Mutex::new(Rgbfps::new());
 pub const LEVELS: u32 = 16;
 
 /// Read global RGB values with mutex lock.
 async fn get_rgb_levels() -> [u32; 3] {
-    let rgb_levels = RGB_LEVELS.lock().await;
-    *rgb_levels
+    let rgbfps = RGB_LEVELS.lock().await;
+    rgbfps.rgb_levels
 }
 
 /// Set global RGB values with mutex lock.
@@ -39,8 +53,8 @@ async fn set_rgb_levels<F>(setter: F)
 where
     F: FnOnce(&mut [u32; 3]),
 {
-    let mut rgb_levels = RGB_LEVELS.lock().await;
-    setter(&mut rgb_levels);
+    let mut rgbfps = RGB_LEVELS.lock().await;
+    setter(&mut rgbfps.rgb_levels);
 }
 
 /// Main program control flow; sets up awaits
