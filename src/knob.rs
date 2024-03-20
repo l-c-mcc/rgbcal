@@ -5,11 +5,16 @@ pub type Adc = saadc::Saadc<'static, 1>;
 pub struct Knob(Adc);
 
 impl Knob {
+    /// Constructs knob; requires analog-to-digital converter
+    /// because the knob reads an analog signal and the nrf/Microbit
+    /// needs it as a digital signal.
     pub async fn new(adc: Adc) -> Self {
         adc.calibrate().await;
         Self(adc)
     }
 
+    /// Returns the current voltage level measured by the potentiometer
+    /// as an integer between 0 and LEVELS-1 (inclusive).
     pub async fn measure(&mut self) -> u32 {
         let mut buf = [0];
         self.0.sample(&mut buf).await;

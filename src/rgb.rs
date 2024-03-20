@@ -10,10 +10,12 @@ pub struct Rgb {
 }
 
 impl Rgb {
+    /// Returns length of a frame given a frame rate in micro seconds.
     fn frame_tick_time(frame_rate: u64) -> u64 {
         1_000_000 / (3 * frame_rate * LEVELS as u64)
     }
 
+    /// Constructs Rgb.
     pub fn new(rgb: RgbPins, frame_rate: u64) -> Self {
         let tick_time = Self::frame_tick_time(frame_rate);
         Self {
@@ -23,6 +25,7 @@ impl Rgb {
         }
     }
 
+    /// Sets LED on/off according to frame rate and LED level.
     async fn step(&mut self, led: usize) {
         let level = self.levels[led];
         if level > 0 {
@@ -38,6 +41,8 @@ impl Rgb {
         }
     }
 
+    /// Reads global RGB values, sets own values accordingly, and then
+    /// powers leds.
     pub async fn run(mut self) -> ! {
         loop {
             self.levels = get_rgb_levels().await;

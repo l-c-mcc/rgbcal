@@ -6,6 +6,7 @@ struct UiState {
 }
 
 impl UiState {
+    /// Prints current frame rate and RGB levels.
     fn show(&self) {
         let names = ["red", "green", "blue"];
         rprintln!();
@@ -17,6 +18,8 @@ impl UiState {
 }
 
 impl Default for UiState {
+    /// Default values for UiState. Max RGB brightness and frame rate at
+    /// two thirds of the max value.
     fn default() -> Self {
         Self {
             levels: [LEVELS - 1, LEVELS - 1, LEVELS - 1],
@@ -33,6 +36,7 @@ pub struct Ui {
 }
 
 impl Ui {
+    /// Constructs Ui.
     pub fn new(knob: Knob, _button_a: Button, _button_b: Button) -> Self {
         Self {
             knob,
@@ -42,6 +46,8 @@ impl Ui {
         }
     }
 
+    /// Read pontentiometer and buttons and updates the RGB
+    /// global accordingly.
     pub async fn run(&mut self) -> ! {
         self.state.levels[2] = self.knob.measure().await;
         set_rgb_levels(|rgb| {

@@ -28,11 +28,13 @@ use num_traits::float::FloatCore;
 pub static RGB_LEVELS: Mutex<ThreadModeRawMutex, [u32; 3]> = Mutex::new([0; 3]);
 pub const LEVELS: u32 = 16;
 
+/// Read global RGB values with mutex lock.
 async fn get_rgb_levels() -> [u32; 3] {
     let rgb_levels = RGB_LEVELS.lock().await;
     *rgb_levels
 }
 
+/// Set global RGB values with mutex lock.
 async fn set_rgb_levels<F>(setter: F)
 where
     F: FnOnce(&mut [u32; 3]),
@@ -41,6 +43,7 @@ where
     setter(&mut rgb_levels);
 }
 
+/// Main program control flow; sets up awaits
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) -> ! {
     rtt_init_print!();
@@ -50,12 +53,14 @@ async fn main(_spawner: Spawner) -> ! {
         SAADC => saadc::InterruptHandler;
     });
 
+    // closure for constructing led pins
     let led_pin = |p| Output::new(p, Level::Low, OutputDrive::Standard);
     let red = led_pin(AnyPin::from(board.p9));
     let green = led_pin(AnyPin::from(board.p8));
     let blue = led_pin(AnyPin::from(board.p16));
     let rgb: Rgb = Rgb::new([red, green, blue], 100);
 
+    // set up adc needed to construct knob
     let mut saadc_config = saadc::Config::default();
     saadc_config.resolution = saadc::Resolution::_14BIT;
     let saadc = saadc::Saadc::new(
@@ -67,6 +72,8 @@ async fn main(_spawner: Spawner) -> ! {
     let knob = Knob::new(saadc).await;
     let mut ui = Ui::new(knob, board.btn_a, board.btn_b);
 
+    // joins the two systems together so that one cannot get ahead 
+    // in "steps" compared to the other
     join::join(rgb.run(), ui.run()).await;
 
     panic!("fell off end of main loop");
