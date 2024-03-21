@@ -67,10 +67,10 @@ impl Ui {
         self.state.show();
         loop {
             level = self.knob.measure().await;
-            match(self.button_a.is_low(),self.button_b.is_low()) {
-                (true , true ) => self.update_led(level, RED).await,
-                (true , false) => self.update_led(level, BLUE).await,
-                (false, true ) => self.update_led(level, GREEN).await,
+            match (self.button_a.is_low(), self.button_b.is_low()) {
+                (true, true) => self.update_led(level, RED).await,
+                (true, false) => self.update_led(level, BLUE).await,
+                (false, true) => self.update_led(level, GREEN).await,
                 (false, false) => self.update_frame_rate(level as u64).await,
             }
             Timer::after_millis(50).await;

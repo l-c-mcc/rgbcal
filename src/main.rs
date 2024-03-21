@@ -33,7 +33,7 @@ pub struct Rgbfps {
 
 impl Rgbfps {
     /// Constructs Rgbfps with lowest reasonable values.
-    const fn new() -> Self{
+    const fn new() -> Self {
         Self {
             rgb_levels: [0; 3],
             frame_rate: 10,
@@ -106,7 +106,7 @@ async fn main(_spawner: Spawner) -> ! {
     let knob = Knob::new(saadc).await;
     let mut ui = Ui::new(knob, board.btn_a, board.btn_b);
 
-    // joins the two systems together so that one cannot get ahead 
+    // joins the two systems together so that one cannot get ahead
     // in "steps" compared to the other
     join::join(rgb.run(), ui.run()).await;
 
