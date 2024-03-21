@@ -41,6 +41,9 @@ impl Rgbfps {
 
 pub static RGB_LEVELS: Mutex<ThreadModeRawMutex, Rgbfps> = Mutex::new(Rgbfps::new());
 pub const LEVELS: u32 = 16;
+pub const RED: usize = 0;
+pub const GREEN: usize = 1;
+pub const BLUE: usize = 2;
 
 /// Read global RGB values with mutex lock.
 async fn get_rgb_levels() -> [u32; 3] {

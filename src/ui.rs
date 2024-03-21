@@ -30,18 +30,18 @@ impl Default for UiState {
 
 pub struct Ui {
     knob: Knob,
-    _button_a: Button,
-    _button_b: Button,
+    button_a: Button,
+    button_b: Button,
     state: UiState,
 }
 
 impl Ui {
     /// Constructs Ui.
-    pub fn new(knob: Knob, _button_a: Button, _button_b: Button) -> Self {
+    pub fn new(knob: Knob, button_a: Button, button_b: Button) -> Self {
         Self {
             knob,
-            _button_a,
-            _button_b,
+            button_a,
+            button_b,
             state: UiState::default(),
         }
     }
@@ -60,17 +60,25 @@ impl Ui {
         self.state.show();
         loop {
             level = self.knob.measure().await;
-            for led in 0..3 {
-                if level != self.state.levels[led] {
-                    self.state.levels[led] = level;
-                    self.state.show();
-                    set_rgb_levels(|rgb| {
-                        *rgb = self.state.levels;
-                    })
-                    .await;
-                }
+            match(self.button_a.is_low(),self.button_b.is_low()) {
+                (true , true ) => self.update_led(level, RED).await,
+                (true , false) => self.update_led(level, BLUE).await,
+                (false, true ) => self.update_led(level, GREEN).await,
+                (false, false) => {},
             }
+            
             Timer::after_millis(50).await;
+        }
+    }
+
+    async fn update_led(&mut self, level: u32, led: usize) {
+        if level != self.state.levels[led] {
+            self.state.levels[led] = level;
+            self.state.show();
+            set_rgb_levels(|rgb| {
+                *rgb = self.state.levels;
+            })
+            .await;
         }
     }
 }
