@@ -45,6 +45,7 @@ impl Rgb {
     /// powers leds.
     pub async fn run(mut self) -> ! {
         loop {
+            self.tick_time = Self::frame_tick_time(get_frame_rate().await);
             self.levels = get_rgb_levels().await;
 
             for led in 0..3 {

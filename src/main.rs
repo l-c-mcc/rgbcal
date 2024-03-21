@@ -27,14 +27,14 @@ use num_traits::float::FloatCore;
 
 pub struct Rgbfps {
     rgb_levels: [u32; 3],
-    frame_rate: u32,
+    frame_rate: u64,
 }
 
 impl Rgbfps {
     const fn new() -> Self{
         Self {
             rgb_levels: [0; 3],
-            frame_rate: 0,
+            frame_rate: 10,
         }
     }
 }
@@ -58,6 +58,19 @@ where
 {
     let mut rgbfps = RGB_LEVELS.lock().await;
     setter(&mut rgbfps.rgb_levels);
+}
+
+async fn get_frame_rate() -> u64 {
+    let rbgfps = RGB_LEVELS.lock().await;
+    rbgfps.frame_rate
+}
+
+async fn set_frame_rate<F>(setter: F)
+where
+    F: FnOnce(&mut u64),
+{
+    let mut rgbfps = RGB_LEVELS.lock().await;
+    setter(&mut rgbfps.frame_rate);
 }
 
 /// Main program control flow; sets up awaits

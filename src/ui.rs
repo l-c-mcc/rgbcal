@@ -53,8 +53,13 @@ impl Ui {
         for led in 0..3 {
             self.state.levels[led] = level;
         }
+        self.state.frame_rate = 10 * (level + 1) as u64;
         set_rgb_levels(|rgb| {
             *rgb = self.state.levels;
+        })
+        .await;
+        set_frame_rate(|frame_rate| {
+            *frame_rate = self.state.frame_rate;
         })
         .await;
         self.state.show();
@@ -64,7 +69,7 @@ impl Ui {
                 (true , true ) => self.update_led(level, RED).await,
                 (true , false) => self.update_led(level, BLUE).await,
                 (false, true ) => self.update_led(level, GREEN).await,
-                (false, false) => {},
+                (false, false) => self.update_frame_rate(level as u64).await,
             }
             
             Timer::after_millis(50).await;
@@ -77,6 +82,18 @@ impl Ui {
             self.state.show();
             set_rgb_levels(|rgb| {
                 *rgb = self.state.levels;
+            })
+            .await;
+        }
+    }
+
+    async fn update_frame_rate(&mut self, level: u64) {
+        let level = 10 * (level + 1);
+        if level != self.state.frame_rate {
+            self.state.frame_rate = level;
+            self.state.show();
+            set_frame_rate(|frame_rate| {
+                *frame_rate = level;
             })
             .await;
         }
