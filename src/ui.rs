@@ -1,5 +1,6 @@
 use crate::*;
 
+/// Struct for managing data associated with the UI.
 struct UiState {
     levels: [u32; 3],
     frame_rate: u64,
@@ -28,6 +29,7 @@ impl Default for UiState {
     }
 }
 
+/// Struct that manages the UI's data and its associated hardware peripherals.
 pub struct Ui {
     knob: Knob,
     button_a: Button,
@@ -71,11 +73,11 @@ impl Ui {
                 (false, true ) => self.update_led(level, GREEN).await,
                 (false, false) => self.update_frame_rate(level as u64).await,
             }
-            
             Timer::after_millis(50).await;
         }
     }
 
+    /// Updates the level value of the given led in the global state if it has changed.
     async fn update_led(&mut self, level: u32, led: usize) {
         if level != self.state.levels[led] {
             self.state.levels[led] = level;
@@ -87,6 +89,7 @@ impl Ui {
         }
     }
 
+    /// Updates the frame rate in the global state if it has changed.
     async fn update_frame_rate(&mut self, level: u64) {
         let level = 10 * (level + 1);
         if level != self.state.frame_rate {

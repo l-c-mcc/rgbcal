@@ -2,6 +2,7 @@ use crate::*;
 
 pub type Adc = saadc::Saadc<'static, 1>;
 
+/// Struct for managing the ADC that talks to the potentiometer.
 pub struct Knob(Adc);
 
 impl Knob {

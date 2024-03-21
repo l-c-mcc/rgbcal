@@ -25,12 +25,14 @@ use microbit_bsp::{
 };
 use num_traits::float::FloatCore;
 
+/// Struct for managing LED values and their frame rate.
 pub struct Rgbfps {
     rgb_levels: [u32; 3],
     frame_rate: u64,
 }
 
 impl Rgbfps {
+    /// Constructs Rgbfps with lowest reasonable values.
     const fn new() -> Self{
         Self {
             rgb_levels: [0; 3],
@@ -39,7 +41,7 @@ impl Rgbfps {
     }
 }
 
-pub static RGB_LEVELS: Mutex<ThreadModeRawMutex, Rgbfps> = Mutex::new(Rgbfps::new());
+pub static LED_VALUES: Mutex<ThreadModeRawMutex, Rgbfps> = Mutex::new(Rgbfps::new());
 pub const LEVELS: u32 = 16;
 pub const RED: usize = 0;
 pub const GREEN: usize = 1;
@@ -47,7 +49,7 @@ pub const BLUE: usize = 2;
 
 /// Read global RGB values with mutex lock.
 async fn get_rgb_levels() -> [u32; 3] {
-    let rgbfps = RGB_LEVELS.lock().await;
+    let rgbfps = LED_VALUES.lock().await;
     rgbfps.rgb_levels
 }
 
@@ -56,24 +58,26 @@ async fn set_rgb_levels<F>(setter: F)
 where
     F: FnOnce(&mut [u32; 3]),
 {
-    let mut rgbfps = RGB_LEVELS.lock().await;
+    let mut rgbfps = LED_VALUES.lock().await;
     setter(&mut rgbfps.rgb_levels);
 }
 
+/// Read the global frame rate with mutex lock.
 async fn get_frame_rate() -> u64 {
-    let rbgfps = RGB_LEVELS.lock().await;
+    let rbgfps = LED_VALUES.lock().await;
     rbgfps.frame_rate
 }
 
+/// Set the global frame rate with mutex lock.
 async fn set_frame_rate<F>(setter: F)
 where
     F: FnOnce(&mut u64),
 {
-    let mut rgbfps = RGB_LEVELS.lock().await;
+    let mut rgbfps = LED_VALUES.lock().await;
     setter(&mut rgbfps.frame_rate);
 }
 
-/// Main program control flow; sets up awaits
+/// Main program control flow; sets up awaits.
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) -> ! {
     rtt_init_print!();
